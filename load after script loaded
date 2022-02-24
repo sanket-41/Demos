@@ -1,0 +1,33 @@
+function calljqeury(src, callback) {
+    var script = document.createElement('script');
+    script.src = src;
+    script.onload = function () {
+        callback();
+    }
+    document.head.appendChild(script);
+}
+
+calljqeury('https://code.jquery.com/jquery-3.4.1.min.js', function () {
+  //write code here
+});
+
+
+
+var settings = {
+     "async": true,
+     "crossDomain": true,
+     "url": APIurl,
+     "method": method,
+     "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+     },
+     "dataType": "JSON",
+     "data": {
+        "password": "1234"
+     }
+}
+
+$.ajax(settings).done(function (exist) {
+
+});
