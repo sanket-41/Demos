@@ -325,3 +325,109 @@
     });
   </script>
 </div>
+
+
+
+
+
+{%- if section.settings.filter_type == 'custom_filter' -%}
+<script>
+  $(document).ready(function(){
+    //ajax call by url and replace html
+    var active_f = [];
+    var x = $('.temp_col_wp').attr('data-hand'); 
+    function searchResult(url){
+      
+      var hrf = window.location.href;      
+      
+      if(url.indexOf('?') <= 0){        
+        url = url + '?sort_by='+$('#sort-by-selector .value-picker__choice-item.link.is-selected').attr('data-value');
+      }
+
+      $.ajax({
+        url: url,
+        dataType: 'json',
+        error: function(){
+          console.log("no data found");
+          document.dispatchEvent(new CustomEvent('theme:loading:end'));
+        }
+      }).done(function( data ) {
+        window.history.replaceState(null, null, url);
+        $.get( url, function(data) {         
+          $('.collection__toolbar').html($(data).find('.collection__toolbar').html())          
+          //MOBILE
+          $('body').after('<div class="removable" style="display: none;">'+ $(data).find('#mobile-collection-filters').html() +'</div>');
+          $('#mobile-collection-filters .collection__filter-group-name[aria-expanded="true"]').each(function(){
+            $('.removable').find('.collection__filter-group-name[aria-controls="'+ $(this).attr('aria-controls') +'"]').attr('aria-expanded','true');
+            $('.removable').find('#'+$(this).attr('aria-controls')).attr('aria-hidden','false').css({"height": "auto","overflow": "visible"});	
+          });          
+          $('#mobile-collection-filters').html($('.removable').html());
+
+          //DESKTOP
+          $('body').after('<div class="removable_desktop" style="display: none;">'+ $(data).find('#desktop-collection-filters').html() +'</div>');
+          $('#desktop-collection-filters .collection__filter-group-name[aria-expanded="true"]').each(function(){
+            $('.removable_desktop').find('.collection__filter-group-name[aria-controls="'+ $(this).attr('aria-controls') +'"]').attr('aria-expanded','true');
+            $('.removable_desktop').find('#'+$(this).attr('aria-controls')).attr('aria-hidden','false').css({"height": "auto","overflow": "visible"});	
+          });
+          $('#desktop-collection-filters').html($('.removable_desktop').html());                     
+          $('.custom_filter_result').html($(data).find('.custom_filter_result').html());
+          document.dispatchEvent(new CustomEvent('theme:loading:end'));
+        });
+      })
+    }
+    
+    $('body').on('click','.collection__clear-filter,.clear_button', function(e) {
+      document.dispatchEvent(new CustomEvent('theme:loading:start'));
+      searchResult($(this).attr('data-url'));
+      active_f = [];
+      $('body').attr('data-current_tags','');
+    });
+    
+    $('body').on('click','button.collection__mobile-active-filter-item, .collection__active-filter-item', function(e) {
+      e.preventDefault();
+      document.dispatchEvent(new CustomEvent('theme:loading:start'));
+      var href = $(this).attr('data-url');   
+      var dval = $(this).attr('data-val');   
+      active_f = $.grep(active_f, function(check) {
+        return (check != dval);
+      });
+      var nhref = active_f.join('+'); 
+      $('body').attr('data-current_tags',nhref);
+      if(nhref != ''){
+        href = x +'/'+ nhref;
+      }else{
+        href = x;
+      }
+      searchResult(href);
+    });
+    
+    $('body').on('click','ul.tag_filter li', function(e) {
+      e.preventDefault();
+      document.dispatchEvent(new CustomEvent('theme:loading:start'));
+      var href = $(this).find('input[type="checkbox"]').attr('data-href');
+      var dval = $(this).find('input[type="checkbox"]').attr('data-val');
+      if($(this).find('input[type="checkbox"]').hasClass('is_selected')){
+        $(this).find('input[type="checkbox"]').removeClass('is_selected');
+        active_f = $.grep(active_f, function(check) {
+          return (check != dval);
+        });
+      }else{
+        $(this).find('input[type="checkbox"]').addClass('is_selected');
+        active_f.push($(this).find('input[type="checkbox"]').attr('data-val'));
+      }      
+      var nhref = active_f.join('+'); 
+      $('body').attr('data-current_tags',nhref);      
+      if(nhref != ''){
+        href = x +'/'+ nhref;
+      }else{
+        href = x;
+      }
+      
+      searchResult(href);
+
+    });    
+    
+  }); 
+</script>
+{% endif %}
+
