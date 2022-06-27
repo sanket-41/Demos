@@ -1,0 +1,7 @@
+// jQuery
+var $carousel = $('.carousel').flickity()
+$carousel.flickity('resize')
+
+// vanilla JS
+var flkty = new Flickity('.carousel');
+flkty.resize()
